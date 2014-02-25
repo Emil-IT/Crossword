@@ -8,6 +8,18 @@ REPRESENTATION INVARIANT:
 datatype 'a cPuzzle = CP of 'a list list
 val empty = CP([])
 
+fun toHorizontal ([], acc) = acc
+  | toHorizontal (puzzle, acc) = 
+    let
+	fun tailFold ([], b) = b
+	  | tailFold (a, b) = (tl a)::b
+	fun headFold ([], b) = b
+	  | headFold (a, b) = (hd a)::b
+	val nextList = foldr headFold [] puzzle
+    in
+	toHorizontal (foldr tailFold [] puzzle, if nextList = [] then acc else nextList::acc)
+    end
+ 
 (*
 preprocess puzzle
 TYPE: int list list -> int list list
