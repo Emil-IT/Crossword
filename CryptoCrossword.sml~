@@ -1,0 +1,60 @@
+(* CryptoCrossword *)
+<<<<<<< HEAD
+use "dictionarys.sml";
+
+datatype 'a cPuzzle = CP of 'a list list
+val empty = CP([])
+
+
+	
+
+
+fun getFromList word nil _ = NONE
+  | getFromList _ (nil::_) _ = NONE
+  | getFromList word ((hd::tl)::t2) ml =
+    let 
+	val testWord = explode hd
+	fun wordOK nil nil ml = true
+	  | wordOK (nrhd::nrtl) (whd::wtl) ml =
+	    let
+		fun isOK _ _ nil = true
+		  | isOK l n ((ll, ln)::tl) = 
+		    if l = ll then 
+			if n = ln then true
+			else false
+		    else if n = ln then 
+			false
+		    else isOK l n tl
+	    in 
+		(isOK whd nrhd !ml) andalso (ml := (whd, nrhd)::!ml) ;(wordOK nrtl wtl ml))
+	    end
+    in
+	if (length testWord) = (length word) then
+	    if  wordOK word testWord ml then 
+		testword
+	    else
+		getFromList word (t1::t2) ml
+	else 
+	    getFromList word t2 ml
+    end
+=======
+
+(*
+REPRESENTATION CONVENTION: 
+REPRESENTATION INVARIANT:
+*)
+datatype CrossWord = CW of int list list
+
+(*
+solve x
+TYPE:
+PRE:
+POST:
+EXAMPLE:
+*)
+fun solve crossword = 
+let
+	
+in
+end
+>>>>>>> 9eee448fc7aa1ad4d868922acce4e5346da6c81a
