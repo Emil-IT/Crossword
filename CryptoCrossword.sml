@@ -8,48 +8,64 @@ REPRESENTATION INVARIANT:
 datatype 'a cPuzzle = CP of 'a list list
 val empty = CP([])
 
-fun toHorizontal ([], acc) = acc
-  | toHorizontal (puzzle, acc) = 
-    let
-	fun tailFold ([], b) = b
-	  | tailFold (a, b) = (tl a)::b
-	fun headFold ([], b) = b
-	  | headFold (a, b) = (hd a)::b
-	val nextList = foldr headFold [] puzzle
-    in
-	toHorizontal (foldr tailFold [] puzzle, if nextList = [] then acc else nextList::acc)
-    end
- 
-(*
-preprocess puzzle
-TYPE: int list list -> int list list
-PRE: true
-POST: 
-EXAMPLE: preprocess [[1,2,3],[0,1,2],[],[0,1,0]] = [[1, 2, 3], [1, 2]]
-VARIANT: length puzzle
-*)
-fun preprocess [] = []
-  | preprocess (p::puzzle) =
-    let
-        (*
-        preprocess' (list, acc)
-        TYPE: int list * int list -> int list list
-        PRE: true
-        POST: int list list with the elements being the groups of non-zero numbers in a row (and excluding groups of length 1)
-        EXAMPLE: preprocess' ([1,2,0,3,4,0,1], []) = [[1, 2], [3, 4]]
-        VARIANT: length list
-        *)
-        fun preprocess' ([], []) = []
-	  | preprocess' ([], [a]) = []
-	  | preprocess' ([], acc) = (rev acc)::[]
-	  | preprocess' (0::list, [a]) = preprocess' (list, [])
-          | preprocess' (0::list, acc) = (rev acc)::(preprocess' (list, [])) 
-          | preprocess' (l::list, acc) = preprocess'(list, l::acc)
-        val a = preprocess' (p, [])
-    in
-        a @ preprocess puzzle
-    end
 
+
+(*
+ preprocess puzzle
+ TYPE: int list list -> int list list
+ PRE: every element in puzzle are of the same length
+ POST: 
+ EXAMPLE: preprocess [[1,2,3],[0,1,2],[],[0,1,0]] = [[1, 2, 3], [1, 2], [2, 3]]
+ VARIANT: length puzzle
+*)
+fun preprocess puzzle = 
+    let
+	fun toHorizontal ([], acc) = acc
+	  | toHorizontal (puzzle, acc) = 
+	    let
+		fun tailFold ([], b) = b
+		  | tailFold (a, b) = (tl a)::b
+		fun headFold ([], b) = b
+		  | headFold (a, b) = (hd a)::b
+		val nextList = foldr headFold [] puzzle
+	    in
+		toHorizontal (foldr tailFold [] puzzle, if nextList = [] then acc else nextList::acc)
+	    end
+	(*
+         preprocess' puzzle
+         TYPE: int list list -> int list list
+         PRE: true
+         POST: 
+         EXAMPLE: preprocess' [[1,2,3],[0,1,2],[],[0,1,0]] = [[1, 2, 3], [1, 2]]
+         VARIANT: length puzzle
+	*)
+	fun preprocess' [] = []
+	  | preprocess' (p::puzzle) =
+	    let
+		(*
+                 preprocess'' (list, acc)
+                 TYPE: int list * int list -> int list list
+                 PRE: true
+                 POST: int list list with the elements being the groups of non-zero numbers in a row (and excluding                       groups of length 1)
+                 EXAMPLE: preprocess'' ([1,2,0,3,4,0,1], []) = [[1, 2], [3, 4]]
+                 VARIANT: length list
+		*)
+		fun preprocess'' ([], []) = []
+		  | preprocess'' ([], [a]) = []
+		  | preprocess'' ([], acc) = (rev acc)::[]
+		  | preprocess'' (0::list, []) = preprocess'' (list, [])
+		  | preprocess'' (0::list, [a]) = preprocess'' (list, [])
+		  | preprocess'' (0::list, acc) = (rev acc)::(preprocess'' (list, [])) 
+		  | preprocess'' (l::list, acc) = preprocess''(list, l::acc)
+
+		val a = preprocess'' (p, [])
+	    in
+		a @ preprocess' puzzle
+	    end
+    in 
+	preprocess' (puzzle@(toHorizontal (puzzle, [])))
+    end
+		
 
 (*
 getFromList 
