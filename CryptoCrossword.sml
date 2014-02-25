@@ -27,13 +27,15 @@ fun preprocess [] = []
         EXAMPLE: preprocess' ([1,2,0,3,4,0,1], []) = [[1, 2], [3, 4]]
         VARIANT: length list
         *)
-        fun preprocess' ([], acc) = if length acc > 1 then [List.rev acc] else [[]]
-          | preprocess' (0::list, acc) = if length acc > 1 then (List.rev acc)::preprocess' (list, []) else preprocess'(list, []) 
+        fun preprocess' ([], []) = []
+	  | preprocess' ([], [a]) = []
+	  | preprocess' ([], acc) = (rev acc)::[]
+	  | preprocess' (0::list, [a]) = preprocess' (list, [])
+          | preprocess' (0::list, acc) = (rev acc)::(preprocess' (list, [])) 
           | preprocess' (l::list, acc) = preprocess'(list, l::acc)
-
         val a = preprocess' (p, [])
     in
-        if a = [[]] then preprocess puzzle else a @ preprocess puzzle
+        a @ preprocess puzzle
     end
 
 
