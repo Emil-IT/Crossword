@@ -112,15 +112,9 @@ fun preprocess puzzle =
 		
 
 (*
-<<<<<<< HEAD
-getFromList
-TYPE: ''a list -> string list list -> (char * ''a) list ref -> char list option
-PRE:
-=======
 getFromList 
 TYPE: ''a list -> string list list -> (char * ''a) list ref -> char list option
 PRE: 
->>>>>>> d8d619c6125269bf29107cb483702bba96f658dc
 POST:
 EXAMPLE:
 VARIANT:

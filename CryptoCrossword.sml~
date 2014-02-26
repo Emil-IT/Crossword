@@ -114,7 +114,7 @@ fun preprocess puzzle =
 (*
 <<<<<<< HEAD
 getFromList
-TYPE:
+TYPE: ''a list -> string list list -> (char * ''a) list ref -> char list option
 PRE:
 =======
 getFromList 
