@@ -68,19 +68,20 @@ fun preprocess puzzle =
 		
 
 (*
-getFromList 
-TYPE:
+getFromList
+TYPE: ''a list -> string list list -> (char * ''a) list ref -> char list option
 PRE:
 POST:
 EXAMPLE:
 VARIANT:
 *)
-fun getFromList word nil _ = NONE
-  | getFromList _ (nil::_) _ = NONE
-  | getFromList word ((hd::tl)::t2) ml =
+fun getFromList word nil _ = (NONE, [])
+  | getFromList _ (nil::_) _ = (NONE, [])
+  | getFromList word (dictionary as ((hd::tl)::t2)) ml =
     let 
 	val testWord = explode hd
-	val ordlista = ref (!ml)
+	val mlCopy = ref (!ml)
+
 	fun wordOK nil nil ml = true
 	  | wordOK (nrhd::nrtl) (whd::wtl) ml =
 	    let
@@ -97,10 +98,27 @@ fun getFromList word nil _ = NONE
 	    end
     in
 	if (length testWord) = (length word) then
-	    if  wordOK word testWord ordlista then 
-		(ml := (!ordlista); SOME testWord)
+	    if  wordOK word testWord mlCopy then 
+		(ml := (!mlCopy); (SOME testWord, [tl]))
 	    else
-		(ordlista := (!ml); getFromList word (tl::t2) ordlista)
+		(mlCopy := (!ml); getFromList word [tl] mlCopy)
 	else 
 	    getFromList word t2 ml
+    end
+
+
+fun solve puzzle = 
+    let
+	fun solve' ([], dictionary, ml) = ml
+	  | solve' (puzzle as hd::tl, dictionarys, ml) = 
+	    let
+		val result = getFromList (hd puzzle) dictionary ml
+	    in
+		if isSome #1result then 
+		    solve' (tl, dictionary, ml)
+		else
+		    
+	    end
+    in
+	solve'(preprocess puzzle, shortlist, ref [])
     end
