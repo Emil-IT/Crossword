@@ -153,16 +153,21 @@ fun getFromList word nil _ = (NONE, [])
 
 fun solve puzzle = 
     let
-	fun solve' ([], dictionary, ml) = ml
-	  | solve' (puzzle as hd::tl, dictionarys, ml) = 
+	fun solve' ([], dict, ml) = true
+	  | solve' (puzzle as hd::tl, dict, ml) = 
 	    let
-		val result = getFromList (hd puzzle) dictionary ml
+		val result = getFromList hd dict ml
+		val mlCopy = ref (!ml)
 	    in
-		if isSome #1result then 
-		    solve' (tl, dictionary, ml)
+		if isSome (#1result) andalso solve' (tl, shortlist, mlCopy) then 
+		    (ml := (!mlCopy); true)
 		else
-		    
+		    solve' (puzzle, #2result, ml)
 	    end
+	val ml = ref []
     in
-	solve'(preprocess puzzle, shortlist, ref [])
+	if solve'(preprocess puzzle, shortlist, ml) then 
+	    SOME ml
+	else
+	    NONE
     end
