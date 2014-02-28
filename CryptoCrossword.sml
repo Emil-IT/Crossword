@@ -161,9 +161,7 @@ fun solve puzzle =
 	    in
 		if isSome (#1result) andalso solve' (tl, shortlist, mlCopy) then 
 		    (ml := (!mlCopy); true)
-		else
-		    if #2result = nil then false
-			else solve' (puzzle, #2result, ml)
+	
 	    end
 	val ml = ref []
     in
