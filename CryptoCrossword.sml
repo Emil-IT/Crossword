@@ -179,6 +179,7 @@ fun solve puzzle =
 	    in		  
 		 if isSome (#1result) andalso solve' (tl, longlist, mlCopy) then 
 		    (ml := (!mlCopy); true)
+<<<<<<< HEAD
 		else
 <<<<<<< HEAD
 		    solve' (puzzle, #2result, ml)	
@@ -186,6 +187,9 @@ fun solve puzzle =
 		    if #2result = nil then false
 			else solve' (puzzle, #2result, ml)
 >>>>>>> 16e8c834764e752c0662153c96a44670a9b29543
+=======
+	
+>>>>>>> 6547cdc84ae0211d50508fa2ce3298c8c5907fe4
 	    end
 	val ml = ref []
     in
