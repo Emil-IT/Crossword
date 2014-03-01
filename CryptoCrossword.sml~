@@ -1,3 +1,4 @@
+(* Emil Österberg, Jonas Karlsson, Robin Sund *)
 (* CryptoCrossword *)
 
 use "dictionarys.sml";
@@ -116,12 +117,12 @@ fun preprocess puzzle =
 		
 
 (*
-getFromList 
-TYPE: ''a list -> string list list -> (char * ''a) list ref -> char list option
-PRE: 
-POST:
-EXAMPLE:
-VARIANT:
+getFromList word dictionary ml
+TYPE: getFromList = int list -> string list list -> (char * int) list ref -> char list option * string list list
+PRE: true
+POST: A char list option of the first exploded string from dictionary that has the same structure as word (same character where it's the same int), NONE if no such string exists in dictionary. Also the tail of dictionary after a matching element has been found
+EXAMPLE: getFromList [1,2,2] [["HI"],["FOO", "BAR"]] (ref [(#"F", 1), (#"O", 2), (#"B", 3)]) = (SOME [#"F", #"O", #"O"], [["BAR"]]):
+VARIANT: length dictionary
 *)
 fun getFromList word nil _ = (NONE, [])
   | getFromList _ (nil::_) _ = (NONE, [])
@@ -130,11 +131,25 @@ fun getFromList word nil _ = (NONE, [])
 	val testWord = explode hd
 	val mlCopy = ref (!ml)
 			 
-        (* wordOK numberWord testWord ml
-	 *)
+        (*
+        wordOK numberWord testWord ml
+        TYPE: int list -> char list -> (char * int) list ref -> bool
+        PRE: length numberWord = length testWord
+        POST: true if all numberWord elements and testWord elements of the same position exist in the same element in ml or that they don't exist in ml at all
+        EXAMPLE: wordOK [1, 2, 2] [#"F", #"O", #"O"] (ref [(#"F", 1), (#"O", 2), (#"R", 3)]) = true
+        VARIANT: length numberWord and also length testWord
+	*)
 	fun wordOK nil nil ml = true
 	  | wordOK (nrhd::nrtl) (whd::wtl) ml =
 	    let
+                (*
+                isOK l n list
+                TYPE: ''a -> ''b -> (''a * ''b) list -> bool
+                PRE: true
+                POST: true if l and n both exist in the same pair in the list or that none of them exist in the list, otherwise false
+                EXAMPLE: isOK 1 #"A" [(1, #"A"), (2, #"B")] = true
+                VARIANT: length list
+                *)
 		fun isOK _ _ nil = true
 		  | isOK l n ((ll, ln)::tl) = 
 		    if l = ll then 
@@ -144,6 +159,14 @@ fun getFromList word nil _ = (NONE, [])
 			false
 		    else isOK l n tl
 
+                (*
+                partOf (p, list)
+                TYPE: (char * int) * (char * int) list -> bool
+                PRE: true
+                POST: true if p is equal to an element in list otherwise false
+                EXAMPLE: partOf ((#"B", 2), [(#"A", 1), (#"B", 2), (#"C", 3)]) = true
+                VARIANT: length list
+                *)
 		fun partOf (p : (char*int), [] : (char*int) list) = false
 		  | partOf (p, hd::tl) =
 		    if not ((#1 p) = (#1 hd)) andalso not (partOf(p, tl)) then
@@ -168,8 +191,23 @@ fun getFromList word nil _ = (NONE, [])
     end
 
 
+(*
+solve puzzle
+TYPE: int list list -> (char * int) list option
+PRE:
+POST:
+EXAMPLE:
+*)
 fun solve puzzle = 
     let
+        (*
+        solve' (puzzle, dict, ml)
+        TYPE:
+        PRE:
+        POST:
+        EXAMPLE:
+        VARIANT: length dict
+        *)
 	fun solve' (_, [], _) = false
 	  | solve' ([], _, _) = true
 	  | solve' (puzzle as head::tl, dict, ml) = 
@@ -177,19 +215,10 @@ fun solve puzzle =
 		val result = getFromList head dict ml
 		val mlCopy = ref (!ml)
 	    in		  
-		 if isSome (#1result) andalso solve' (tl, longlist, mlCopy) then 
+		if isSome (#1result) andalso solve' (tl, longlist, mlCopy) then 
 		    (ml := (!mlCopy); true)
-<<<<<<< HEAD
 		else
-<<<<<<< HEAD
 		    solve' (puzzle, #2result, ml)	
-=======
-		    if #2result = nil then false
-			else solve' (puzzle, #2result, ml)
->>>>>>> 16e8c834764e752c0662153c96a44670a9b29543
-=======
-	
->>>>>>> 6547cdc84ae0211d50508fa2ce3298c8c5907fe4
 	    end
 	val ml = ref []
     in
