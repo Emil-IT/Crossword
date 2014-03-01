@@ -44,18 +44,18 @@ let
                         let 
                             fun findPosition' ([], pz, (x', y', z')) = NONE
                               | findPosition' (i'::is', pz' as (p'::ps')::pss', (x', y', z')) = if i' = p' then 
-                                                                                                    SOME (x', y', z')
+                                                                                                     SOME (x', y', z')
                                                                                                 else
                                                                                                     findPosition' (is', pz', (x', y', z'+1))
                             val foo = findPosition' (i::is, pz, (x, y, z))
                         in
                             if isSome foo then 
-                                valOf(foo)
+                                foo
                             else
                                 findPosition(i::is, ps::pss, (x+1, y, 0))
                         end
                 in
-                    findPlacement'(ilist, puzzle, findPosition(ilist, puzzle, (0,0,0)))
+                    findPlacement'(ilist, puzzle, valOf(findPosition(ilist, puzzle, (0,0,0))))
                 end
         in
         end
