@@ -69,35 +69,9 @@ EXAMPLE: 	sllTocl [["FUNKY"], ["TOWN"]]
 fun sllTocl [] = []
   | sllTocl (hd::tl) = slTocl (hd) @ sllTocl (tl)
 
-  (* take (l, n)
-TYPE: 'a list * int -> 'a list
-PRE: True
-POST: The n first elements inserted into ll if n > 0, else l.
-VARIANT: size n
-EXAMPLE: 	take ([1,2,3,4,5,6], 3) = [1, 2, 3]
-*)
- 
-  
-fun take ([], n, ll) = ll
-  | take (_, 0, ll) = ll
-  | take (hd::tl, n, ll) = take (tl, n-1, hd::ll)
-
-(* drop (l, n)
-TYPE: 'a list * int -> 'a list
-PRE: True
-POST: A list without the n first elements, an empty list if n < 0.
-VARIANT: size n
-EXAMPLE: 	drop ([1,2,3,4,5,6], 3) = [4, 5, 6]
-*)
- 
-  
-fun drop ([], _) = []
-  | drop (hd::tl, 0) = hd::tl
-  | drop (hd::tl, n) = drop (tl, n-1)
-
 (* divide (l, n)
 TYPE: 'a list * int -> 'a list list
-PRE: n > 0
+PRE: 0 < n <= length l
 POST: A list with the elements in l sorted into lists of length n.
 VARIANT: size n
 EXAMPLE: 	divide ([1,2,3,4,5,6], 2) = [[1, 2], [3, 4], [5, 6]]
@@ -106,7 +80,7 @@ EXAMPLE: 	divide ([1,2,3,4,5,6], 2) = [[1, 2], [3, 4], [5, 6]]
  
 fun divide ([], _) = []
   | divide (l, n) = 
-	rev (take (l, n, [])) :: divide(drop(l, n), n) 
+	List.take (l, n) :: divide(List.drop(l, n), n) 
 
 
 (* stringToInteger s
