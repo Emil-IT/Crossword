@@ -194,19 +194,20 @@ fun getFromList word nil _ = (NONE, [])
 (*
 solve puzzle
 TYPE: cPuzzle -> (char * int) list option
-PRE: none
-POST: 
-EXAMPLE:
+PRE: true
+POST: A list option with char/int matches that solve the crossword cPuzzle if there is a solution. NONE otherwise
+EXAMPLE: solve [[1,2,3,1,1],[4,0,1,0,3],[3,1,4,5,2],[2,0,5,0,1],[2,3,1,4,3]] = SOME [(#"S",1),(#"T",2),(#"A",3),(#"K",4),(#"E",5)]
 *)
 fun solve puzzle = 
     let
         (*
         solve' (puzzle, dict, ml)
-        TYPE:
-        PRE:
-        POST:
-        EXAMPLE:
-        VARIANT: length dict
+        TYPE: cPuzzle * string list list * (char * int) list ref -> bool
+        PRE: true
+        POST: True if a solution to the crossword puzzle is found, otherwise false
+        SIDE EFFECT: The value of ml is chnged so that it contains the solution of puzzle if there is one.
+        VARIANT: ???
+        EXAMPLE: solve' ([[1,2,3],[1,4,1]], longlist, ref []) = true
         *)
 	fun solve' (_, [], _) = false
 	  | solve' ([], _, _) = true
