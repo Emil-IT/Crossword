@@ -65,16 +65,8 @@ let
                                                 []
 
                             fun notZero q = q <> 0
-
-			    fun trashZeros ([], acc) = acc
-			      | trashZeros  (h::t, acc) = 
-				if notZero h then 
-				    trashZeros (t, h::acc)
-				else
-				    trashZeros (t, acc)
-
                         in
-                            if length(trashZeros (listabove, [])) < 2 andalso length(trashZeros(listy, [])) < 2 andalso length(trashZeros(listbelow, [])) < 2 then 
+                            if length(map notZero listabove) < 2 andalso length(map notZero listy) < 2 andalso length(map notZero listbelow) < 2 then 
                                 SOME(List.take(puzzle', y) @ [(List.take(entirelisty, x-z) @ ilist' @ List.drop(entirelisty, x+lengthlist-z))] @ List.drop(puzzle', y+1))
                             else
                                 NONE
