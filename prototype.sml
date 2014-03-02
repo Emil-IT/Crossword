@@ -28,7 +28,7 @@ let
                             val listbelow = List.drop(List.take(List.nth(puzzle', y+1), x+lengthlist-z), x-z)
                             fun notZero q = q <> 0
                         in
-                            if length(map(notZero, listabove)) < 2 andalso length(map(notZero, listy)) < 2 andalso length(map(notZero, listbelow)) < 2 then 
+                            if length(map notZero listabove) < 2 andalso length(map notZero listy) < 2 andalso length(map notZero listbelow) < 2 then 
                                 SOME(List.take(puzzle', y-1) @ ilist' @ List.drop(puzzle', y))
                             else
                                 NONE
@@ -36,7 +36,6 @@ let
                             
                     (*
                     Hittar en gemensam bokstav och returnerar koordinater där x är positionen i en lista i puzzle, y är positionen på själva listan i puzzle, och z är positionen i int listan.
-                    Denna behöver debuggas.
                     *)
                     fun findPosition (_, [], _) = NONE
                       | findPosition (i, []::pss, (x, y, z)) = findPosition (i, pss, (0, y+1, 0))
