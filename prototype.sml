@@ -23,16 +23,18 @@ let
                       | findPlacement' (ilist', puzzle', (x, y, z)) = 
                         let
                             val lengthlist = length ilist'
-                            val listabove = List.drop(List.take(List.nth(puzzle', y-1), x+lengthlist-z), x-z)
-                            val listy = List.drop(List.take(List.nth(puzzle', y), x+lengthlist-z), x-z)
-                            val listbelow = List.drop(List.take(List.nth(puzzle', y+1), x+lengthlist-z), x-z)
+                            val entirelisty = List.nth(puzzle', y)
+                            val listabove = List.drop(List.take(List.nth(puzzle', y-1), lengthlist), x-z)
+                            val listy = List.drop(List.take(entirelisty, lengthlist), x-z)
+                            val listbelow = List.drop(List.take(List.nth(puzzle', y+1), lengthlist), x-z)
                             fun notZero q = q <> 0
                         in
                             if length(map notZero listabove) < 2 andalso length(map notZero listy) < 2 andalso length(map notZero listbelow) < 2 then 
-                                SOME(List.take(puzzle', y-1) @ ilist' @ List.drop(puzzle', y))
+                                SOME(List.take(puzzle', y) @ [(List.take(entirelisty, x-z) @ ilist' @ List.drop(entirelisty, x+lengthlist-z))] @ List.drop(puzzle', y+1))
                             else
                                 NONE
                         end
+
                             
                     (*
                     Hittar en gemensam bokstav och returnerar koordinater där x är positionen i en lista i puzzle, y är positionen på själva listan i puzzle, och z är positionen i int listan.
