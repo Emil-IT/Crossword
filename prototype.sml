@@ -24,9 +24,46 @@ let
                         let
                             val lengthlist = length ilist'
                             val entirelisty = List.nth(puzzle', y)
-                            val listabove = List.drop(List.take(List.nth(puzzle', y-1), lengthlist), x-z)
-                            val listy = List.drop(List.take(entirelisty, lengthlist), x-z)
-                            val listbelow = List.drop(List.take(List.nth(puzzle', y+1), lengthlist), x-z)
+                                                      
+                            val listabove = if y >= 1 then
+                                                if x >= z then 
+                                                    if (length(List.nth(puzzle', y-1)) - x) >= (lengthlist - z) then
+                                                        List.drop(List.take(List.nth(puzzle', y-1), lengthlist), x-z)
+                                                    else
+                                                        List.drop(List.nth(puzzle', y-1), x-z)
+                                                else
+                                                    if (length(List.nth(puzzle', y-1)) - x) >= (lengthlist - z) then
+                                                        List.take(List.nth(puzzle', y-1), x+z-lengthlist)
+                                                    else
+                                                        List.nth(puzzle', y-1)
+                                            else
+                                                []
+
+                            val listy = if x >= z then 
+                                            if (length(entirelisty) - x) >= (lengthlist - z) then
+                                                List.drop(List.take(entirelisty, lengthlist), x-z)
+                                            else
+                                                List.drop(entirelisty, x-z)
+                                        else
+                                            if (length(entirelisty) - x) >= (lengthlist - z) then
+                                                List.take(entirelisty, x+z-lengthlist)
+                                            else
+                                                entirelisty
+
+                            val listbelow = if length puzzle' > 1 then
+                                                if x >= z then 
+                                                    if (length(List.nth(puzzle', y+1)) - x) >= (lengthlist - z) then
+                                                        List.drop(List.take(List.nth(puzzle', y+1), lengthlist), x-z)
+                                                    else
+                                                        List.drop(List.nth(puzzle', y+1), x-z)
+                                                else
+                                                    if (length(List.nth(puzzle', y+1)) - x) >= (lengthlist - z) then
+                                                        List.take(List.nth(puzzle', y+1), x+z-lengthlist)
+                                                    else
+                                                        List.nth(puzzle', y+1)
+                                            else
+                                                []
+
                             fun notZero q = q <> 0
                         in
                             if length(map notZero listabove) < 2 andalso length(map notZero listy) < 2 andalso length(map notZero listbelow) < 2 then 
@@ -55,8 +92,14 @@ let
                             else
                                 findPosition(i::is, ps::pss, (x+1, y, 0))
                         end
+
+                    val result = findPlacement'(ilist, puzzle, valOf(findPosition(ilist, puzzle, (0,0,0))))
                 in
-                    findPlacement'(ilist, puzzle, valOf(findPosition(ilist, puzzle, (0,0,0))))
+                    result
+                (*
+                SPEKULATION:
+                if isSome result then result else toHorizontal(findPlacement(ilist, getVer(puzzle, length puzzle), (0,0,0))) 
+                *)
                 end
         in
         end
