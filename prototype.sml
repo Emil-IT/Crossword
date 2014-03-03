@@ -16,8 +16,8 @@ let
                     (*
                     Långt ifrån klar, det är tänkt att man laddar in en int list, puzzle och koordinater för en gemensam bokstav, denna kollar listorna ovanför, under, och listan där ordet ska sättas in. 
                     Tanken var att man kallar på denna funktion först med puzzle utskriven i vågräta listor, sedan lodräta om det ej fanns resultat.
-                    Det viktigaste som saknas här är att den ska automatiskt veta att det finns ledig plats när listorna tar slut, t.ex. att det står [0,1,0] och ens egna ord börjar på ettan (med en etta) men är typ 5 siffror långt, 
-                    vilket bör ge tillbaka [0, 1, *, *, *, *] och även ändra alla listors storlek genom att fylla i med nollor.
+
+                    Det som saknas nu är att fylla i med nollor där det behövs!
                     *)
                     fun findPlacement' (ilist', [], _) = NONE
                       | findPlacement' (ilist', puzzle', (x, y, z)) = 
@@ -28,12 +28,12 @@ let
                             val listabove = if y >= 1 then
                                                 if x >= z then 
                                                     if (length(List.nth(puzzle', y-1)) - x) >= (lengthlist - z) then
-                                                        List.drop(List.take(List.nth(puzzle', y-1), lengthlist), x-z)
+                                                        List.drop(List.take(List.nth(puzzle', y-1), lengthlist+1), x-z)
                                                     else
                                                         List.drop(List.nth(puzzle', y-1), x-z)
                                                 else
                                                     if (length(List.nth(puzzle', y-1)) - x) >= (lengthlist - z) then
-                                                        List.take(List.nth(puzzle', y-1), x+z-lengthlist)
+                                                        List.take(List.nth(puzzle', y-1), x+lengthlist-z)
                                                     else
                                                         List.nth(puzzle', y-1)
                                             else
@@ -41,24 +41,24 @@ let
 
                             val listy = if x >= z then 
                                             if (length(entirelisty) - x) >= (lengthlist - z) then
-                                                List.drop(List.take(entirelisty, lengthlist), x-z)
+                                                List.drop(List.take(entirelisty, lengthlist+1), x-z)
                                             else
                                                 List.drop(entirelisty, x-z)
                                         else
                                             if (length(entirelisty) - x) >= (lengthlist - z) then
-                                                List.take(entirelisty, x+z-lengthlist)
+                                                List.take(entirelisty, x+lengthlist-z)
                                             else
                                                 entirelisty
 
                             val listbelow = if length puzzle' > 1 then
                                                 if x >= z then 
                                                     if (length(List.nth(puzzle', y+1)) - x) >= (lengthlist - z) then
-                                                        List.drop(List.take(List.nth(puzzle', y+1), lengthlist), x-z)
+                                                        List.drop(List.take(List.nth(puzzle', y+1), lengthlist+1), x-z)
                                                     else
                                                         List.drop(List.nth(puzzle', y+1), x-z)
                                                 else
                                                     if (length(List.nth(puzzle', y+1)) - x) >= (lengthlist - z) then
-                                                        List.take(List.nth(puzzle', y+1), x+z-lengthlist)
+                                                        List.take(List.nth(puzzle', y+1), x+lengthlist-z)
                                                     else
                                                         List.nth(puzzle', y+1)
                                             else
@@ -66,10 +66,13 @@ let
 
                             fun notZero q = q <> 0
                         in
-                            if length(map notZero listabove) < 2 andalso length(map notZero listy) < 2 andalso length(map notZero listbelow) < 2 then 
-                                SOME(List.take(puzzle', y) @ [(List.take(entirelisty, x-z) @ ilist' @ List.drop(entirelisty, x+lengthlist-z))] @ List.drop(puzzle', y+1))
+                            if length(List.filter notZero listabove) < 2 andalso length(List.filter notZero listy) < 2 andalso length(List.filter notZero listbelow) < 2 then 
+                                SOME(List.take(puzzle', y) @ 
+                                [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
+                                List.drop(puzzle', y+1))
                             else
                                 NONE
+                            
                         end
 
                             
