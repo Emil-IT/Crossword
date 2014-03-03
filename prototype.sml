@@ -16,8 +16,6 @@ let
                     (*
                     Långt ifrån klar, det är tänkt att man laddar in en int list, puzzle och koordinater för en gemensam bokstav, denna kollar listorna ovanför, under, och listan där ordet ska sättas in. 
                     Tanken var att man kallar på denna funktion först med puzzle utskriven i vågräta listor, sedan lodräta om det ej fanns resultat.
-
-                    Det som saknas nu är att fylla i med nollor där det behövs!
                     *)
                     fun findPlacement' (ilist', [], _) = NONE
                       | findPlacement' (ilist', puzzle', (x, y, z)) = 
@@ -65,15 +63,39 @@ let
                                                 []
 
                             fun notZero q = q <> 0
+                            fun zeroMaker (0, acczero) = acczero
+                              | zeroMaker (n, acczero) = zeroMaker(n-1, [0] @ acczero)
                         in
                             if length(List.filter notZero listabove) < 2 andalso length(List.filter notZero listy) < 2 andalso length(List.filter notZero listbelow) < 2 then 
-                                SOME(List.take(puzzle', y) @ 
-                                [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
-                                List.drop(puzzle', y+1))
+                                if x > z then
+                                    if length(entirelisty) - x > lengthlist - z then
+                                        SOME(List.take(puzzle', y) @ 
+                                        [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
+                                        List.drop(puzzle', y+1))
+                                    else
+                                        SOME(List.take(puzzle', y-1) @ 
+                                        [List.nth(puzzle', y-1) @ zeroMaker(lengthlist-z - length(entirelisty)+x, [])] @
+                                        [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
+                                        [List.nth(puzzle', y+1) @ zeroMaker(lengthlist-z - length(entirelisty)+x, [])] @
+                                        List.drop(puzzle', y+2))
+                                else
+                                    if length(entirelisty) - x > lengthlist - z then
+                                        SOME(List.take(puzzle', y-1) @ 
+                                        [zeroMaker(z-x,[])@List.nth(puzzle', y-1)] @
+                                        [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
+                                        [zeroMaker(z-x,[])@List.nth(puzzle', y+1)] @
+                                        List.drop(puzzle', y+2))
+                                    else
+                                        SOME(List.take(puzzle', y-1) @ 
+                                        [zeroMaker(z-x,[]) @ List.nth(puzzle', y-1) @ zeroMaker(lengthlist-z - length(entirelisty)+x, [])] @
+                                        [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
+                                        [zeroMaker(z-x,[]) @ List.nth(puzzle', y+1) @ zeroMaker(lengthlist - z - length(entirelisty) + x, [])] @
+                                        List.drop(puzzle', y+2))
                             else
                                 NONE
                             
                         end
+
 
                             
                     (*
