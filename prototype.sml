@@ -88,7 +88,7 @@ let
                                     else
                                         SOME(addAfter(lengthlist-z-length(entirelisty)+x, addBefore(z-x, List.take(puzzle', y))) @
                                         [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
-                                        addAfter(lengthlist-z-length(entirelisty)+x, addBefore(z-x, List.take(puzzle', y))))
+                                        addAfter(lengthlist-z-length(entirelisty)+x, addBefore(z-x, List.drop(puzzle', y+1))))
                             else
                                 NONE
                         end
