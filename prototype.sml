@@ -11,14 +11,63 @@ fun generator l =
 let
     fun generatorAux (l, acc) =
         let
+            fun toHorizontal ([], acc) = rev acc
+	      | toHorizontal (puzzle, acc) = 
+	        let
+                    (*
+                tailFold (a, b)
+                TYPE: 'a list * 'a list list -> 'a list list
+                PRE: true
+                POST: b with the tail of a as head. If a is the empty list then b.
+                EXAMPLE: tailFold ([1,2,3], [[0], [1,2]]) = [[2, 3], [0], [1, 2]]
+                    *)
+		    fun tailFold ([], b) = b
+		      | tailFold (a, b) = (tl a)::b
+                                                      
+                    (*
+                headFold (a, b)
+                TYPE: 'a list * 'a list -> 'a list
+                PRE: true
+                POST: b with the head of a as head. If a is the empty list then b.
+                EXAMPLE: headFold ([1,2,3], [4,5,6]) = [1, 4, 5, 6]: int list
+                    *)
+		    fun headFold ([], b) = b
+		      | headFold (a, b) = (hd a)::b
+		    val nextList = foldr headFold [] puzzle
+	        in
+		    toHorizontal (foldr tailFold [] puzzle, if nextList = [] then acc else nextList::acc)
+	        end
+
+            fun cwCompare (puzzle1, puzzle2) = 
+                let
+                    fun letterCalc ([], a) = a
+                      | letterCalc ([]::puzzle, a) = letterCalc(puzzle, a)
+                      | letterCalc ((p::ps)::puzzle, a) = if p = 0 then 
+                                                             letterCalc(ps::puzzle, a) 
+                                                         else 
+                                                             letterCalc(ps::puzzle, a+1)
+  
+                    fun areaCalc (p::puzzle) = length p * length puzzle
+                in
+                    if letterCalc(puzzle1, 0) > letterCalc(puzzle2, 0) then
+                        puzzle2
+                    else if letterCalc(puzzle1, 0) < letterCalc(puzzle2, 0) then
+                        puzzle1
+                    else
+                        if areaCalc(puzzle1) > areaCalc(puzzle2) then
+                            puzzle2
+                        else
+                            puzzle1
+                end
+                    
             fun findPlacement (ilist, puzzle) = 
                 let
                     (*
                     Långt ifrån klar, det är tänkt att man laddar in en int list, puzzle och koordinater för en gemensam bokstav, denna kollar listorna ovanför, under, och listan där ordet ska sättas in. 
                     Tanken var att man kallar på denna funktion först med puzzle utskriven i vågräta listor, sedan lodräta om det ej fanns resultat.
                     *)
-                    fun findPlacement' (ilist', [], _) = NONE
-                      | findPlacement' (ilist', puzzle', (x, y, z)) = 
+                    fun findPlacement' (_, _, []) = []
+                      | findPlacement' (ilist', puzzle', (x, y, z)::posList) = 
                         let
                             val lengthlist = length ilist'
                             val entirelisty = List.nth(puzzle', y)
@@ -26,7 +75,7 @@ let
                             val listabove = if y >= 1 then
                                                 if x > z then 
                                                     if (length(List.nth(puzzle', y-1)) - x) > (lengthlist - z) then
-                                                        List.drop(List.take(List.nth(puzzle', y-1), lengthlist+1), x-z)
+                                                        List.drop(List.take(List.nth(puzzle', y-1), lengthlist), x-z)
                                                     else 
                                                         List.drop(List.nth(puzzle', y-1), x-z)
                                                 else
@@ -38,20 +87,20 @@ let
                                                 []
                                                     
                             val listy = if x > z then
-                                            if (length(entirelisty) - x) > (lengthlist - z + 1) then
+                                            if (length(entirelisty) - x) > (lengthlist - z) then
                                                 List.drop(List.take(entirelisty, lengthlist+2), x-z-1)
                                             else
                                                 List.drop(entirelisty, x-z-1)
                                         else
-                                            if (length(entirelisty) - x) > (lengthlist - z - 1) then
+                                            if (length(entirelisty) - x) > (lengthlist - z) then
                                                 List.take(entirelisty, x+lengthlist-z + 1)
                                             else
                                                 entirelisty
                                                     
-                            val listbelow = if length puzzle' > 1 then
+                            val listbelow = if (length puzzle' - y) > 1 then
                                                 if x > z then 
-                                                    if (length(List.nth(puzzle', y+1)) - x) >(lengthlist - z) then
-                                                        List.drop(List.take(List.nth(puzzle', y+1), lengthlist+1), x-z)
+                                                    if (length(List.nth(puzzle', y+1)) - x) > (lengthlist - z) then
+                                                        List.drop(List.take(List.nth(puzzle', y+1), lengthlist), x-z)
                                                     else
                                                         List.drop(List.nth(puzzle', y+1), x-z)
                                                 else
@@ -73,57 +122,48 @@ let
                             if length(List.filter notZero listabove) < 2 andalso length(List.filter notZero listy) < 2 andalso length(List.filter notZero listbelow) < 2 then 
                                 if x > z then
                                     if length(entirelisty) - x > lengthlist - z then
-                                        SOME(List.take(puzzle', y) @ 
+                                        (List.take(puzzle', y) @ 
                                         [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
-                                        List.drop(puzzle', y+1))
+                                        List.drop(puzzle', y+1)) :: findPlacement'(ilist', puzzle', posList)
                                     else
-                                        SOME(addAfter(lengthlist-z - length(entirelisty)+x, List.take(puzzle', y)) @
+                                        (addAfter(lengthlist-z - length(entirelisty)+x, List.take(puzzle', y)) @
                                         [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
-                                        addAfter(lengthlist-z - length(entirelisty)+x, List.drop(puzzle', y+1)))
+                                        addAfter(lengthlist-z - length(entirelisty)+x, List.drop(puzzle', y+1))) :: findPlacement'(ilist', puzzle', posList)
                                 else
                                     if length(entirelisty) - x > lengthlist - z then
-                                        SOME(addBefore(z-x, List.take(puzzle', y)) @
+                                        (addBefore(z-x, List.take(puzzle', y)) @
                                         [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
-                                        addBefore(z-x, List.drop(puzzle', y+1)))
+                                        addBefore(z-x, List.drop(puzzle', y+1))) :: findPlacement'(ilist', puzzle', posList)
                                     else
-                                        SOME(addAfter(lengthlist-z-length(entirelisty)+x, addBefore(z-x, List.take(puzzle', y))) @
+                                        (addAfter(lengthlist-z-length(entirelisty)+x, addBefore(z-x, List.take(puzzle', y))) @
                                         [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
-                                        addAfter(lengthlist-z-length(entirelisty)+x, addBefore(z-x, List.drop(puzzle', y+1))))
+                                        addAfter(lengthlist-z-length(entirelisty)+x, addBefore(z-x, List.drop(puzzle', y+1)))) :: findPlacement'(ilist', puzzle', posList)
                             else
-                                NONE
+                                findPlacement'(ilist', puzzle', posList)
                         end
-
-
-
                             
                     (*
                     Hittar en gemensam bokstav och returnerar koordinater där x är positionen i en lista i puzzle, y är positionen på själva listan i puzzle, och z är positionen i int listan.
                     *)
-                    fun findPosition (_, [], _) = NONE
+                    fun findPosition (_, [], _) = []
                       | findPosition (i, []::pss, (x, y, z)) = findPosition (i, pss, (0, y+1, 0))
                       | findPosition (i::is, pz as (p::ps)::pss, (x, y, z)) = 
                         let 
-                            fun findPosition' ([], pz, (x', y', z')) = NONE
+                            fun findPosition' ([], pz, (x', y', z')) = []
                               | findPosition' (i'::is', pz' as (p'::ps')::pss', (x', y', z')) = if i' = p' then 
-                                                                                                     SOME (x', y', z')
+                                                                                                    (x', y', z')::findPosition' (is', pz', (x', y', z'+1))
                                                                                                 else
                                                                                                     findPosition' (is', pz', (x', y', z'+1))
-                            val foo = findPosition' (i::is, pz, (x, y, z))
+                            val resultPos = findPosition' (i::is, pz, (x, y, z))
                         in
-                            if isSome foo then 
-                                foo
-                            else
-                                findPosition(i::is, ps::pss, (x+1, y, 0))
+                            resultPos @ findPosition(i::is, ps::pss, (x+1,y,0))
                         end
 
-                    val result = findPlacement'(ilist, puzzle, valOf(findPosition(ilist, puzzle, (0,0,0))))
+                    val hpuzzle = toHorizontal(puzzle, [])
                 in
-                    result
-                (*
-                SPEKULATION:
-                if isSome result then result else toHorizontal(findPlacement(ilist, getVer(puzzle, length puzzle), (0,0,0))) 
-                *)
+                    findPlacement'(ilist, puzzle, findPosition(ilist, puzzle, (0,0,0))) @ (foldr (fn(p,l) => (toHorizontal(p, []))::l) [] (findPlacement'(ilist, hpuzzle, findPosition(ilist, hpuzzle, (0,0,0)))))
                 end
+
         in
         end
 in
