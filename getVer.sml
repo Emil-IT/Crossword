@@ -19,4 +19,4 @@ fun getVer' ([], n) = []
 		[[4, 8, 12], [3, 7, 11], [2, 6, 10], [1, 5, 9]]
 *)
 fun getVer (l, 0) = []
-  | getVer (l, n)  = getVer' (l, n) :: getVer (l, n-1)
+  | getVer (l, n)  = rev(rev(getVer' (l, n))) :: getVer (l, n-1)
