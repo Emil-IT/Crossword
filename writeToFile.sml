@@ -16,6 +16,11 @@ fun saveCrossword (cw, file) =
 	TextIO.closeOut ostrm
     end
 
+(* loadCrossword (n, file)
+TYPE: int*string -> cPuzzle option
+PRE: n >= 1. file is the name of a textfile containing crosswords
+POST: The n:th crossword stored in file. If no crossword was found, then NONE.
+*)
 fun loadCrossword (n, file) =
     let
 	fun toCw ([#"\n"], _, [], acc3) = rev acc3
@@ -34,6 +39,6 @@ fun loadCrossword (n, file) =
 	val istrm = TextIO.openIn file
     in
 	case findLine (n, istrm) of 
-	    "" => NONE
-	  | line => SOME (toCw(explode line, "", [], []))
+	    "" => (TextIO.closeIn istrm ; NONE)
+	  | line => (TextIO.closeIn istrm ; SOME (toCw(explode line, "", [], [])))
     end
