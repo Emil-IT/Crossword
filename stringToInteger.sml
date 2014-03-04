@@ -36,7 +36,8 @@ val acc = []
 		fun chrToInt' ([], _, _) = []
 		| chrToInt' (hd::tl, [], n) = n :: chrToInt (tl, ((hd, n)::acc), n+1)
 		| chrToInt' (hd::tl, (ch, i)::l, n) =
-		if ord hd = ord ch then i :: (chrToInt (tl, acc, n))
+		if ord hd = 48 then 0 :: (chrToInt (tl, acc, n))
+		else if ord hd = ord ch then i :: (chrToInt (tl, acc, n))
 		else chrToInt' (hd::tl, l, n)
 	in
 	chrToInt' (cl, acc, n)
