@@ -24,7 +24,7 @@ let
                             val entirelisty = List.nth(puzzle', y)
                                                       
                             val listabove = if y >= 1 then
-                                                if x >= z then 
+                                                if x > z then 
                                                     if (length(List.nth(puzzle', y-1)) - x) > (lengthlist - z) then
                                                         List.drop(List.take(List.nth(puzzle', y-1), lengthlist+1), x-z)
                                                     else 
@@ -37,19 +37,19 @@ let
                                             else
                                                 []
                                                     
-                            val listy = if x >= z then
-                                            if (length(entirelisty) - x) > (lengthlist - z) then
-                                                List.drop(List.take(entirelisty, lengthlist+1), x-z)
+                            val listy = if x > z then
+                                            if (length(entirelisty) - x) > (lengthlist - z + 1) then
+                                                List.drop(List.take(entirelisty, lengthlist+2), x-z-1)
                                             else
-                                                List.drop(entirelisty, x-z)
+                                                List.drop(entirelisty, x-z-1)
                                         else
-                                            if (length(entirelisty) - x) > (lengthlist - z) then
-                                                List.take(entirelisty, x+lengthlist-z)
+                                            if (length(entirelisty) - x) > (lengthlist - z - 1) then
+                                                List.take(entirelisty, x+lengthlist-z + 1)
                                             else
                                                 entirelisty
                                                     
                             val listbelow = if length puzzle' > 1 then
-                                                if x >= z then 
+                                                if x > z then 
                                                     if (length(List.nth(puzzle', y+1)) - x) >(lengthlist - z) then
                                                         List.drop(List.take(List.nth(puzzle', y+1), lengthlist+1), x-z)
                                                     else
@@ -91,7 +91,6 @@ let
                                         addAfter(lengthlist-z-length(entirelisty)+x, addBefore(z-x, List.take(puzzle', y))))
                             else
                                 NONE
-                            
                         end
 
 
