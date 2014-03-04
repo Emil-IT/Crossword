@@ -18,6 +18,22 @@ fun saveCrossword (cw, file) =
 
 fun loadCrossword (n, file) =
     let
-	fun toCw ([#"\n"], acc1, acc2, acc3) = acc2::acc3
-	  | toCw ((#"|")::str, acc1, acc2 , acc3) = toCw(str, [], acc21::acc3)
+	fun toCw ([#"\n"], _, [], acc3) = rev acc3
+	  | toCw ([#"\n"], _, acc2, acc3) = rev( (rev acc2)::acc3)
+	  | toCw ((#"|")::str, acc1, acc2 , acc3) = toCw(str, acc1,[], (rev acc2)::acc3)
+	  | toCw (#" "::str, acc1, acc2, acc3) = toCw(str, "", valOf(Int.fromString acc1)::acc2 , acc3)
 	  | toCw (c::str, acc1, acc2, acc3) = 
+	    if Char.isDigit c then
+		toCw(str, acc1^(Char.toString c), acc2, acc3)
+	    else
+		toCw(str, acc1, acc2, acc3)
+
+	fun findLine (1, istrm) = (case TextIO.inputLine istrm of NONE => "" | SOME line => line)
+          | findLine (n, istrm) = (case TextIO.inputLine istrm of NONE => "" | SOME _ => findLine (n-1, istrm))
+
+	val istrm = TextIO.openIn file
+    in
+	case findLine (n, istrm) of 
+	    "" => NONE
+	  | line => SOME (toCw(explode line, "", [], []))
+    end

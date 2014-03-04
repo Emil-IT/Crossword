@@ -47,15 +47,15 @@ fun getVer (l, 0) = []
 fun preprocess puzzle = 
     let
         (*
-        toHorizontal (puzzle, acc)
+        transpose (puzzle, acc)
         TYPE: ''a list list * ''a list list -> ''a list list
         PRE: every element in puzzle are of the same length
         POST: a ''a list list where the elements of the each list is made up of the elements of the lists in puzzle with the same position
-        EXAMPLE: toHorizontal ([[1,2,3], [4,5,6], [7,8,9]], []) = [[3, 6, 9], [2, 5, 8], [1, 4, 7]]
+        EXAMPLE: transpose ([[1,2,3], [4,5,6], [7,8,9]], []) = [[3, 6, 9], [2, 5, 8], [1, 4, 7]]
         VARIANT: length puzzle
         *)
-	fun toHorizontal ([], acc) = acc
-	  | toHorizontal (puzzle, acc) = 
+	fun transpose ([], acc) = rev acc
+	  | transpose (puzzle, acc) = 
 	    let
                 (*
                 tailFold (a, b)
@@ -78,7 +78,7 @@ fun preprocess puzzle =
 		  | headFold (a, b) = (hd a)::b
 		val nextList = foldr headFold [] puzzle
 	    in
-		toHorizontal (foldr tailFold [] puzzle, if nextList = [] then acc else nextList::acc)
+		transpose (foldr tailFold [] puzzle, if nextList = [] then acc else nextList::acc)
 	    end
 	(*
          preprocess' puzzle

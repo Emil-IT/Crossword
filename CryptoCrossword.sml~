@@ -4,14 +4,14 @@
 use "dictionarys.sml";
 
 (*
-REPRESENTATION CONVENTION: The datatype represents data in the form of a list, containing lists with a mutable datatype as elements.
+REPRESENTATION CONVENTION: A cPuzzle is reprecented by a int list list, where each int list reprecents a row in the crossword. An empty square is reprecented by a 0.
 REPRESENTATION INVARIANT: All lists must be of the same length.
 *)
-datatype 'a cPuzzle = CP of 'a list list
+datatype cPuzzle = CP of int list list
 val empty = CP([])
 
 
-val testList = [["AA", "AB", "BA", "BB", "AC", "BC", "CC", "CA", "CB", "AD", "BD", "CD", "DD", "DA", "DB", "DC"]]
+val testList = [["AB", "BA", "BB", "AC", "BC", "CC", "CA", "CB", "AD", "BD", "CD", "DD", "DA", "DB", "DC","AA"],["BAC", "BBC"]]
 
 (* getVer' (l, n)
 	TYPE: 'a list list * int -> 'a list
@@ -193,32 +193,33 @@ fun getFromList word nil _ = (NONE, [])
 
 (*
 solve puzzle
-TYPE: int list list -> (char * int) list option
-PRE:
-POST:
-EXAMPLE:
+TYPE: cPuzzle -> (char * int) list option
+PRE: true
+POST: A list option with char/int matches that solve the crossword cPuzzle if there is a solution. NONE otherwise
+EXAMPLE: solve [[1,2,3,1,1],[4,0,1,0,3],[3,1,4,5,2],[2,0,5,0,1],[2,3,1,4,3]] = SOME [(#"S",1),(#"T",2),(#"A",3),(#"K",4),(#"E",5)]
 *)
 fun solve puzzle = 
     let
         (*
         solve' (puzzle, dict, ml)
-        TYPE:
-        PRE:
-        POST:
-        EXAMPLE:
-        VARIANT: length dict
+        TYPE: cPuzzle * string list list * (char * int) list ref -> bool
+        PRE: true
+        POST: True if a solution to the crossword puzzle is found, otherwise false
+        SIDE EFFECT: The value of ml is chnged so that it contains the solution of puzzle if there is one.
+        VARIANT: ???
+        EXAMPLE: solve' ([[1,2,3],[1,4,1]], longlist, ref []) = true
         *)
 	fun solve' (_, [], _) = false
 	  | solve' ([], _, _) = true
 	  | solve' (puzzle as head::tl, dict, ml) = 
 	    let
-		val result = getFromList head dict ml
 		val mlCopy = ref (!ml)
+		val result = getFromList head dict ml
 	    in		  
-		if isSome (#1result) andalso solve' (tl, longlist, mlCopy) then 
-		    (ml := (!mlCopy); true)
+		if isSome (#1result) andalso solve' (tl, longlist, ml) then 
+		    true
 		else
-		    solve' (puzzle, #2result, ml)	
+		   (ml := (!mlCopy); solve' (puzzle, #2result, ml))	
 	    end
 	val ml = ref []
     in
