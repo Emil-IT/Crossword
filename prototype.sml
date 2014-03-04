@@ -25,46 +25,50 @@ let
                                                       
                             val listabove = if y >= 1 then
                                                 if x >= z then 
-                                                    if (length(List.nth(puzzle', y-1)) - x) >= (lengthlist - z) then
+                                                    if (length(List.nth(puzzle', y-1)) - x) > (lengthlist - z) then
                                                         List.drop(List.take(List.nth(puzzle', y-1), lengthlist+1), x-z)
-                                                    else
+                                                    else 
                                                         List.drop(List.nth(puzzle', y-1), x-z)
                                                 else
-                                                    if (length(List.nth(puzzle', y-1)) - x) >= (lengthlist - z) then
+                                                    if (length(List.nth(puzzle', y-1)) - x) > (lengthlist - z) then
                                                         List.take(List.nth(puzzle', y-1), x+lengthlist-z)
                                                     else
                                                         List.nth(puzzle', y-1)
                                             else
                                                 []
-
-                            val listy = if x >= z then 
-                                            if (length(entirelisty) - x) >= (lengthlist - z) then
+                                                    
+                            val listy = if x >= z then
+                                            if (length(entirelisty) - x) > (lengthlist - z) then
                                                 List.drop(List.take(entirelisty, lengthlist+1), x-z)
                                             else
                                                 List.drop(entirelisty, x-z)
                                         else
-                                            if (length(entirelisty) - x) >= (lengthlist - z) then
+                                            if (length(entirelisty) - x) > (lengthlist - z) then
                                                 List.take(entirelisty, x+lengthlist-z)
                                             else
                                                 entirelisty
-
+                                                    
                             val listbelow = if length puzzle' > 1 then
                                                 if x >= z then 
-                                                    if (length(List.nth(puzzle', y+1)) - x) >= (lengthlist - z) then
+                                                    if (length(List.nth(puzzle', y+1)) - x) >(lengthlist - z) then
                                                         List.drop(List.take(List.nth(puzzle', y+1), lengthlist+1), x-z)
                                                     else
                                                         List.drop(List.nth(puzzle', y+1), x-z)
                                                 else
-                                                    if (length(List.nth(puzzle', y+1)) - x) >= (lengthlist - z) then
+                                                    if (length(List.nth(puzzle', y+1)) - x) > (lengthlist - z) then
                                                         List.take(List.nth(puzzle', y+1), x+lengthlist-z)
                                                     else
                                                         List.nth(puzzle', y+1)
                                             else
                                                 []
-
+                                                    
                             fun notZero q = q <> 0
                             fun zeroMaker (0, acczero) = acczero
                               | zeroMaker (n, acczero) = zeroMaker(n-1, [0] @ acczero)
+                            fun addBefore (_, []) = []
+                              | addBefore (n, l::list) =  [zeroMaker(n, []) @ l] @ addBefore(n, list)
+                            fun addAfter (_, []) = []
+                              | addAfter (n, l::list) = [l @ zeroMaker(n, [])] @ addAfter(n, list)
                         in
                             if length(List.filter notZero listabove) < 2 andalso length(List.filter notZero listy) < 2 andalso length(List.filter notZero listbelow) < 2 then 
                                 if x > z then
@@ -73,28 +77,23 @@ let
                                         [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
                                         List.drop(puzzle', y+1))
                                     else
-                                        SOME(List.take(puzzle', y-1) @ 
-                                        [List.nth(puzzle', y-1) @ zeroMaker(lengthlist-z - length(entirelisty)+x, [])] @
+                                        SOME(addAfter(lengthlist-z - length(entirelisty)+x, List.take(puzzle', y)) @
                                         [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
-                                        [List.nth(puzzle', y+1) @ zeroMaker(lengthlist-z - length(entirelisty)+x, [])] @
-                                        List.drop(puzzle', y+2))
+                                        addAfter(lengthlist-z - length(entirelisty)+x, List.drop(puzzle', y+1)))
                                 else
                                     if length(entirelisty) - x > lengthlist - z then
-                                        SOME(List.take(puzzle', y-1) @ 
-                                        [zeroMaker(z-x,[])@List.nth(puzzle', y-1)] @
+                                        SOME(addBefore(z-x, List.take(puzzle', y)) @
                                         [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
-                                        [zeroMaker(z-x,[])@List.nth(puzzle', y+1)] @
-                                        List.drop(puzzle', y+2))
+                                        addBefore(z-x, List.drop(puzzle', y+1)))
                                     else
-                                        SOME(List.take(puzzle', y-1) @ 
-                                        [zeroMaker(z-x,[]) @ List.nth(puzzle', y-1) @ zeroMaker(lengthlist-z - length(entirelisty)+x, [])] @
+                                        SOME(addAfter(lengthlist-z-length(entirelisty)+x, addBefore(z-x, List.take(puzzle', y))) @
                                         [(if x > z then List.take(entirelisty, x-z) else []) @ ilist' @ (if length(entirelisty) - x > lengthlist-z then List.drop(entirelisty, x+lengthlist-z) else [])] @ 
-                                        [zeroMaker(z-x,[]) @ List.nth(puzzle', y+1) @ zeroMaker(lengthlist - z - length(entirelisty) + x, [])] @
-                                        List.drop(puzzle', y+2))
+                                        addAfter(lengthlist-z-length(entirelisty)+x, addBefore(z-x, List.take(puzzle', y))))
                             else
                                 NONE
                             
                         end
+
 
 
                             
