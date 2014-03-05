@@ -112,7 +112,7 @@ fun preprocess puzzle =
 		a @ preprocess' puzzle
 	    end
     in 
-	preprocess' (puzzle@(toHorizontal (puzzle, [])))
+	preprocess' (puzzle@(transpose (puzzle, [])))
     end
 		
 
