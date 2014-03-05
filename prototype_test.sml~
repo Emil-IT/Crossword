@@ -28,7 +28,7 @@ fun transpose ([], acc) = rev acc
     end
 	
 
-fun findPlacement' (ilist, [], []) = [[ilist], transpose([ilist], [])]
+fun findPlacement' (ilist, [], []) = [[ilist], toHorizontal([ilist], [])]
   | findPlacement' (_, _, []) = []
   | findPlacement' (ilist', puzzle', (x, y, z)::posList) = 
     let
