@@ -221,14 +221,21 @@ fun stringToInt s =
 	end
 			  
 
- fun main' ([], cw) = [cw]
-   | main' (ilist::ilists, cw) = 
+ fun main' ([], cw, _) = [cw]
+   | main' (ilist::ilists, cw, n) = 
      let
+	 fun zeros 0 = []
+	   | zeros n = 0::zeros(n-1)
 	 val cwT = transpose(cw, [])
 	 val allCombos = findPlacement'(ilist, cw, findPosition(ilist, cw, (0,0,0))) @ (foldr (fn(p,l) => (transpose(p, []))::l) [] (findPlacement'(ilist, cwT, findPosition(ilist, cwT, (0,0,0)))))
+    
      in
-	 foldr (fn (x,xs) => main'(ilists, x)@xs) [] allCombos
+	 case allCombos of [] => if n <= length(ilist::ilists) then
+				     main'(ilists@[ilist], cw, n+1) 
+				 else 
+				     main'(ilists ,hd (findPlacement'(ilist, (zeros(length ilist))::(zeros(length ilist))::cw, [(0,0,0)])), 0)
+			 | _ => foldr (fn (x,xs) => main'(ilists, x, 0)@xs) [] allCombos
      end
 	 
 fun generate words =
-    cwCompare(main'(stringToInt words, []),[])
+    cwCompare(main'(stringToInt words, [], 0),[])
