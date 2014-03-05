@@ -38,7 +38,9 @@ let
 		    toHorizontal (foldr tailFold [] puzzle, if nextList = [] then acc else nextList::acc)
 	        end
 
-            fun cwCompare (puzzle1, puzzle2) = 
+            fun cwCompare ([], compareAcc) = compareAcc
+              | cwCompare (p1::puzzle, []) = cwCompare(puzzle, p1)
+              | cwCompare (p1::puzzle, compareAcc) = 
                 let
                     fun letterCalc ([], a) = a
                       | letterCalc ([]::puzzle, a) = letterCalc(puzzle, a)
@@ -49,18 +51,18 @@ let
   
                     fun areaCalc (p::puzzle) = length p * length puzzle
                 in
-                    if letterCalc(puzzle1, 0) > letterCalc(puzzle2, 0) then
-                        puzzle2
-                    else if letterCalc(puzzle1, 0) < letterCalc(puzzle2, 0) then
-                        puzzle1
+                    if letterCalc(p1, 0) > letterCalc(compareAcc, 0) then
+                        cwCompare(puzzle, compareAcc)
+                    else if letterCalc(p1, 0) < letterCalc(compareAcc, 0) then
+                        cwCompare(puzzle, p1)
                     else
-                        if areaCalc(puzzle1) > areaCalc(puzzle2) then
-                            puzzle2
+                        if areaCalc(p1) > areaCalc(compareAcc) then
+                            cwCompare(puzzle, compareAcc)
                         else
-                            puzzle1
+                            cwCompare(puzzle, p1)
                 end
                     
-            fun findPlacement (ilist, puzzle) = 
+            fun findPlacement (ilist::ilists, puzzle, c::comboAcc) = 
                 let
                     (*
                     Långt ifrån klar, det är tänkt att man laddar in en int list, puzzle och koordinater för en gemensam bokstav, denna kollar listorna ovanför, under, och listan där ordet ska sättas in. 
@@ -160,10 +162,16 @@ let
                         end
 
                     val hpuzzle = toHorizontal(puzzle, [])
+                    val allCombos = findPlacement'(ilist, puzzle, findPosition(ilist, puzzle, (0,0,0))) @ (foldr (fn(p,l) => (toHorizontal(p, []))::l) [] (findPlacement'(ilist, hpuzzle, findPosition(ilist, hpuzzle, (0,0,0)))))
                 in
-                    findPlacement'(ilist, puzzle, findPosition(ilist, puzzle, (0,0,0))) @ (foldr (fn(p,l) => (toHorizontal(p, []))::l) [] (findPlacement'(ilist, hpuzzle, findPosition(ilist, hpuzzle, (0,0,0)))))
+                    if ilists = [] then 
+                        cwCompare(allCombos, []) 
+                    else 
+                        if comboAcc = [] then
+                            cwCompare((findPlacement(ilists, hd(allCombos), [])::findPlacement(ilist::ilists, puzzle, tl(allCombos))), [])
+                        else
+                            cwCompare(findPlacement(ilists, c, [])::findPlacement(ilist::ilists, puzzle, comboAcc), [])
                 end
-
         in
         end
 in
