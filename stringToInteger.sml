@@ -93,12 +93,39 @@ EXAMPLE: stringToInteger [["HEJ"], ["HUR"], ["GAR"], ["DET"]] =
 
 *)  
   
-fun stringToInteger s =
+fun stringToInt s =
 	let 
-		val n = size(hd (hd(s)))
+	    fun stringToInt' ([], _, _, acc) = rev acc
+	      | stringToInt' (s::sl, ml, n, acc) = 
+		let
+		    fun clToInt ([], ml : (char*int) list, n, acc) = (ml, n, rev acc)
+		      | clToInt (c::cl, [], n, acc) = clToInt(cl, [(c,n)], n+1, n::acc)
+		      | clToInt (c::cl, ml, n, acc) = 
+			let 
+			    fun getNr (c1, []) = NONE
+			      | getNr (c1, (c2, n)::tl) = 
+				if c1 = c2 then 
+				    SOME n 
+				else 
+				    getNr(c1, tl)
+			    val result = getNr(c, ml)
+			in
+			    if isSome result then
+				clToInt(cl, ml, n, (valOf result)::acc)
+			    else
+				clToInt(cl, (c, n)::ml, n+1, n::acc)
+			end
+		    val (ml, n, word) = clToInt(explode s, ml, n, [])
+		in
+		    stringToInt'(sl, ml, n, word::acc)
+		end
 	in
-		divide(clToInt (sllTocl s), n)
-
+	    stringToInt'(s, [], 1, [])
+	end
+			    
+		
+	in
+	    stringToInt' (map explode s, [], [])
 	end;
 
 val test = [["HEJ"], ["HUR"], ["GAR"], ["DET"]];
