@@ -1,6 +1,51 @@
+(* generator.sml *)
+(* Jonas Karlsson, Robin Sund, Emil Österberg *)
 
 
+(* transpose (cw, acc)
+TYPE: ''a list list * ''a list list -> ''a list list
+PRE: All lists in cw are the same length
+POST: cw transposed and concatinated with acc.
+VARIANT: length of the lists in cw
+EXAMPLE: transpose([[1,2,3],[4,5,6],[7,8,9]], []) = [[1,4,7],[2,5,8],[3,6,9]]
+ *)
+fun transpose ([], acc) = rev acc
+  | transpose (cw, acc) = 
+    let
+	(* tailFold (a, b)
+                        TYPE: 'a list * 'a list list -> 'a list list
+                        PRE: true
+                        POST: b with the tail of a as head. If a is the empty list then b.
+                        EXAMPLE: tailFold ([1,2,3], [[0], [1,2]]) = [[2, 3], [0], [1, 2]]
+	 *)
+	fun tailFold ([], b) = b
+	  | tailFold (a, b) = (tl a)::b
+					  
+	(* headFold (a, b)
+                        TYPE: 'a list * 'a list -> 'a list
+                        PRE: true
+                        POST: b with the head of a as head. If a is the empty list then b.
+                        EXAMPLE: headFold ([1,2,3], [4,5,6]) = [1, 4, 5, 6]: int list
+	 *)
+	fun headFold ([], b) = b
+	  | headFold (a, b) = (hd a)::b
+	val nextList = foldr headFold [] cw
+    in
+	transpose (foldr tailFold [] cw, if nextList = [] then acc else nextList::acc)
+    end
 
+
+(*
+findPlacement (ilist, puzzle', posList)
+TYPE: int list * int list list * (int * int * int) list -> int list list list
+PRE: all elements of puzzle' is of equal length. x <= length hd(puzzle'). y <= length(puzzle'). z <= length ilist
+POST: a list of all puzzles where ilist has been inserted in the different positions decided by posList, with each individual puzzle filled with zeros where neccessary
+EXAMPLE: findPlacement([1,2,3], [[0,1, 0], [0,2,0],[0,3,0]], [(1,0,0),(1,1,1),(1,2,2)]) =
+[[[0, 1, 2, 3], [0, 2, 0, 0], [0, 3, 0, 0]],
+ [[0, 1, 0], [1, 2, 3], [0, 3, 0]],
+ [[0, 0, 1, 0], [0, 0, 2, 0], [1, 2, 3, 0]]]
+VARIANT: length posList
+*)	
 fun findPlacement (ilist, [], []) = [[ilist], transpose([ilist], [])]
   | findPlacement (_, _, []) = []
   | findPlacement (ilist', puzzle', (x, y, z)::posList) = 
@@ -46,16 +91,67 @@ fun findPlacement (ilist, [], []) = [[ilist], transpose([ilist], [])]
                                     List.nth(puzzle', y+1)
                         else
                             []
-                                
+         
+	(*
+        notZero q
+        TYPE: int -> bool
+        PRE: true
+        POST: false if q = 0, otherwise true
+        EXAMPLE: notZero 1 = true
+        *)                       
         fun notZero q = q <> 0
+
+	(*
+        zeroMaker (n, acczero)
+        TYPE: int * int list -> int list
+        PRE: n >= 0
+        POST: a list with n amount of zeros added to acczero
+        EXAMPLE: zeroMaker(3, []) = [0,0,0]
+        VARIANT: n
+        *)
         fun zeroMaker (0, acczero) = acczero
           | zeroMaker (n, acczero) = zeroMaker(n-1, [0] @ acczero)
+
+	(*
+        addBefore (n, list)
+        TYPE: int * int list list -> int list list
+        PRE: n >= 0
+        POST: list with n amount of zeros @ all elements in list
+        EXAMPLE: addBefore(2, [[1,2,3],[4,5,6]]) = [[0,0,1,2,3],[0,0,4,5,6]]
+        VARIANT: length list
+        *)
         fun addBefore (_, []) = []
           | addBefore (n, l::list) = [zeroMaker(n, []) @ l] @ addBefore(n, list)
+
+	(*
+        addAfter (n, list)
+        TYPE: int * int list list -> int list list
+        PRE: n >= 0
+        POST: list with all elements in list @ n amount of zeros 
+        EXAMPLE: addAfter(2, [[1,2,3],[4,5,6]]) = [[1,2,3,0,0],[4,5,6,0,0]]
+        VARIANT: length list
+        *)
         fun addAfter (_, []) = []
           | addAfter (n, l::list) = [l @ zeroMaker(n, [])] @ addAfter(n, list)
+
+	(*
+        checkList
+        TYPE: unit -> bool
+        PRE: the values ilist, listy, listabove, listbelow, lengthlist and entirelisty are defined as int lists and the values x and z are defined as ints
+        POST: false if conditions for calling checkList' are not met, otherwise a boolean decided by checkList'
+        EXAMPLE: val ilist = [1,2,3];val listy = [1,1,2,3];val listabove = [0,0,0,0];val listbelow = [0,0,0,0];val lengthlist=length ilist; val entirelisty=[1,1,2,3];val x = 1;val z=0; checkList() = false
+        *)
         fun checkList () = 
             let
+
+		(*
+                checkList' (list1, list2, list3, list4)
+                TYPE: int list * int list * int list * int list -> bool
+                PRE: length list1 = length list4, length list2 <= length list1, length list3 <= length list1
+                POST: true if all elements of list1 is either equal to list4 or 0, and also that when list2 and list3 has any element besides 0, list1 has a nonzero element at the same position. Otherwise false.
+                EXAMPLE: checkList'([1,0,3], [4,0,2], [6,0,7], [1,2,3]) = true
+                VARIANT: length list1
+                *)
                 fun checkList' ([], [], [], []) = true
                   | checkList' (l1::list1, [], [], l4::list4) = if  l1 = 0 orelse l1 = l4 then
                                                                     checkList'(list1, [], [], list4)
@@ -119,11 +215,26 @@ fun findPlacement (ilist, [], []) = [[ilist], transpose([ilist], [])]
             findPlacement(ilist', puzzle', posList)
     end
 	
-
+(*
+findPosition (i, pz, (x, y, z))
+TYPE: int list * int list list * (int * int * int) -> (int * int * int) list
+PRE: true
+POST: all positions of the elements that i and pz has in common where x represents how far into a list in pz the common element is, y represents which list in pz the common element is in, and z represents which element of i the common element is
+EXAMPLE: findPosition([1,2,3], [[1],[2]], (0,0,0)) = [(0,0,0), (0,1,1)]
+*)
 fun findPosition (_, [], _) = []
   | findPosition (i, []::pss, (x, y, z)) = findPosition (i, pss, (0, y+1, 0))
   | findPosition (i::is, pz as (p::ps)::pss, (x, y, z)) = 
     let 
+
+	(*
+        findPosition'(i, pz, (x, y, z))
+        TYPE: ''a list * ''a list list * ('b * 'c * int) -> ('b * 'c * int) list
+        PRE: true
+        POST: a ('b * 'c * int) list with the positions of all elements from i that are equal to hd(hd(pz))
+        EXAMPLE: findPosition'([1,2,1], [[1,2,3]], (0,0,0)) = [(0, 0, 0), (0, 0, 2)]
+        VARIANT: length i
+        *)
         fun findPosition' ([], pz, (x', y', z')) = []
           | findPosition' (i'::is', pz' as (p'::ps')::pss', (x', y', z')) = if i' = p' then 
                                                                                 (x', y', z')::findPosition' (is', pz', (x', y', z'+1))
@@ -133,11 +244,27 @@ fun findPosition (_, [], _) = []
     in
         resultPos @ findPosition(i::is, ps::pss, (x+1,y,0))
     end
-	
+
+
+(* cwCompare (cwList, compareAcc)
+TYPE: int list list list * int list list -> int list list
+PRE: true
+POST: The best crossword in cwList where a crossword is considered better if it contains a smaller number of letters. In case of a tie the crossword with the smallest area is the better one.
+VARIANT: length cwList
+EXAMPLE: cwCompare ([[[1,2,3],[2,3,4]], [[1,2,0],[2,3,4]]], []) = [[1,2,0],[2,3,4]]
+*)	
 fun cwCompare ([], compareAcc) = compareAcc
   | cwCompare (cw::cwList, []) = cwCompare(cwList, cw)
   | cwCompare (cw::cwList, compareAcc) = 
     let
+
+	(* letterCalc (cw, a)
+	TYPE: int list list * int -> int
+	PRE: true
+	POST: The total number of non zero elements in the lists in cw added to the number a
+	VARIANT: length cw
+	EXAMPLE: letterCalc [[1,2,0,3],[0,2,3,0]] = 5
+	 *)
 	fun letterCalc ([], a) = a
 	  | letterCalc ([]::cw, a) = letterCalc(cw, a)
 	  | letterCalc ((p::ps)::cw, a) = 
@@ -145,7 +272,13 @@ fun cwCompare ([], compareAcc) = compareAcc
 		letterCalc(ps::cw, a) 
 	    else 
 		letterCalc(ps::cw, a+1)
-			  
+	
+	(* areCalc cw
+	TYPE: 'a list list -> int
+	PRE: All lists in cw are of the same length
+	POST: The total number of elements in the lists in cw
+	EXAMPLE: areaCalc [[1,2,3],[3,4,2]] = 6
+	 *)		  
 	fun areaCalc (row1::cw) = length row1 * ((length cw)+1)
 						    
 	val cwLetters = letterCalc(cw, 0)
@@ -162,9 +295,22 @@ fun cwCompare ([], compareAcc) = compareAcc
 		cwCompare(cwList, cw)
     end	
 	
-
+(* stringToInt s
+TYPE: string list -> int list list
+PRE: true
+POST: The strings in s translated to lists of numbers in such a way that if two letters are equal they are translated to the same number and if two letters are not equal they are translated to different numbers.
+EXAMPLE: stringToInt ["FOO", "BAR"] = [[1,2,2],[3,4,5]]
+*)
 fun stringToInt s =
     let 
+
+	(* stringToInt' (sl, ml, n, acc)
+	TYPE: string list * (char * int) list * int * int list list -> int list list
+	PRE: n is greater then the highest number allready associated with a character in ml
+	POST: The strings in sl translated to lists of numbers in such a way that if two letters are equal they are translated to the same number and if two letters are not equal they are translated to different numbers.
+	VARIANT: lenght sl
+	EXAMPLE: stringToInt' (["FOO", "BAR"], [], 1, []) = [[1,2,2],[3,4,5]]
+	 *)
 	fun stringToInt' ([], _, _, acc) = rev acc
 	  | stringToInt' (s::sl, ml, n, acc) = 
 	    let
@@ -174,7 +320,7 @@ fun stringToInt s =
 		PRE: n is greater then the highest number allready associated with a character in ml.
 		POST: ml with the new char-int matches inserted. n incremented as many times as the number of chars inserted to ml. cl with the characters translated to numbers with the help of ml.
                 VARIANT: length cl
-		EXAMPLE: 
+		EXAMPLE: clToInt ([#"F", #"O", #"O"], [], 1, []) = ([(#"O",2),(#"F",1)],3,[1,2,2])
 		 *)
 		fun clToInt ([], ml : (char*int) list, n, acc) = (ml, n, rev acc)
 		  | clToInt (c::cl, [], n, acc) = clToInt(cl, [(c,n)], n+1, n::acc)
@@ -226,7 +372,7 @@ fun generate words =
     let	
 
 	(* generate' (ilists, cw, n)
-	TYPE: int list list * cPuzzle * int -> int list list list
+	TYPE: int list list * int list list * int -> int list list list
 	PRE: true
 	POST: A list of crosswords with different ways to insert the words in ilists into cw
 	VARIANT: length ilists
@@ -239,37 +385,7 @@ fun generate words =
 	  | generate' (ilist::ilists, cw, n) = 
 	    let
 
-		(* transpose (cw, acc)
-		TYPE: ''a list list * ''a list list -> ''a list list
-                PRE: All lists in cw are the same length
-                POST: cw transposed and concatinated with acc.
-                VARIANT: length of the lists in cw
-                EXAMPLE: transpose([[1,2,3],[4,5,6],[7,8,9]], []) = [[1,4,7],[2,5,8],[3,6,9]]
-		 *)
-		fun transpose ([], acc) = rev acc
-		  | transpose (cw, acc) = 
-		    let
-			(* tailFold (a, b)
-                        TYPE: 'a list * 'a list list -> 'a list list
-                        PRE: true
-                        POST: b with the tail of a as head. If a is the empty list then b.
-                        EXAMPLE: tailFold ([1,2,3], [[0], [1,2]]) = [[2, 3], [0], [1, 2]]
-			*)
-			fun tailFold ([], b) = b
-			  | tailFold (a, b) = (tl a)::b
-							  
-			(* headFold (a, b)
-                        TYPE: 'a list * 'a list -> 'a list
-                        PRE: true
-                        POST: b with the head of a as head. If a is the empty list then b.
-                        EXAMPLE: headFold ([1,2,3], [4,5,6]) = [1, 4, 5, 6]: int list
-			*)
-			fun headFold ([], b) = b
-			  | headFold (a, b) = (hd a)::b
-			val nextList = foldr headFold [] cw
-		    in
-			transpose (foldr tailFold [] cw, if nextList = [] then acc else nextList::acc)
-		    end
+	
 			
 		(* zeros n
 		TYPE: int -> int list
@@ -281,13 +397,13 @@ fun generate words =
 		fun zeros 0 = []
 		  | zeros n = 0::zeros(n-1)
 		val cwT = transpose(cw, [])
-		val allCombos = findPlacement'(ilist, cw, findPosition(ilist, cw, (0,0,0))) @ (foldr (fn(p,l) => (transpose(p, []))::l) [] (findPlacement'(ilist, cwT, findPosition(ilist, cwT, (0,0,0)))))
+		val allCombos = findPlacement(ilist, cw, findPosition(ilist, cw, (0,0,0))) @ (foldr (fn(p,l) => (transpose(p, []))::l) [] (findPlacement(ilist, cwT, findPosition(ilist, cwT, (0,0,0)))))
 												  
 	    in
 		case allCombos of [] => if n <= length(ilist::ilists) then
 					    generate'(ilists@[ilist], cw, n+1) 
 					else 
-					    generate'(ilists ,hd (findPlacement'(ilist, (zeros(length (hd cw)))::(zeros(length (hd cw)))::cw, [(0,0,0)])), 0)
+					    generate'(ilists ,hd (findPlacement(ilist, (zeros(length (hd cw)))::(zeros(length (hd cw)))::cw, [(0,0,0)])), 0)
 				| _ => foldr (fn (x,xs) => generate'(ilists, x, 0)@xs) [] allCombos
 	    end
 
