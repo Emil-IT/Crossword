@@ -5,14 +5,6 @@ use "dictionarys.sml";
 use "generator.sml";
 use "writeToFile.sml";
 
-(*
-REPRESENTATION CONVENTION: A cPuzzle is reprecented by a int list list, where each int list reprecents a row in the crossword. An empty square is reprecented by a 0.
-REPRESENTATION INVARIANT: All lists must be of the same length.
-*)
-datatype cPuzzle = CP of int list list
-val empty = CP([])
-
-
 val testList = [["AB", "BA", "BB", "AC", "BC", "CC", "CA", "CB", "AD", "BD", "CD", "DD", "DA", "DB", "DC","AA"],["BAC", "BBC"]]
 
 
@@ -173,7 +165,7 @@ fun getFromList word nil _ = (NONE, [])
 
 (*
 solve puzzle
-TYPE: cPuzzle -> (char * int) list option
+TYPE: int list list -> (char * int) list option
 PRE: true
 POST: A list option with char/int matches that solve the crossword cPuzzle if there is a solution. NONE otherwise
 EXAMPLE: solve [[1,2,3,1,1],[4,0,1,0,3],[3,1,4,5,2],[2,0,5,0,1],[2,3,1,4,3]] = SOME [(#"S",1),(#"T",2),(#"A",3),(#"K",4),(#"E",5)]
@@ -182,7 +174,7 @@ fun solve puzzle =
     let
         (*
         solve' (puzzle, dict, ml)
-        TYPE: cPuzzle * string list list * (char * int) list ref -> bool
+        TYPE: int list list * string list list * (char * int) list ref -> bool
         PRE: true
         POST: True if a solution to the crossword puzzle is found, otherwise false
         SIDE EFFECT: The value of ml is chnged so that it contains the solution of puzzle if there is one.
